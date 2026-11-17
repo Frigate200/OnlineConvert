@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+ENV/
+env/
+
+# IDE & OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# User uploads (temporary files)
+uploads/*
+!uploads/.gitkeep
+
+# Archives & logs
+*.tar.gz
+*.zip
+*.log

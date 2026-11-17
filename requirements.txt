@@ -1,0 +1,15 @@
+flask
+Pillow
+pdf2image
+img2pdf
+pdf2docx
+tabula-py
+pypdf
+pytesseract
+opencv-python-headless
+pandas
+openpyxl
+python-docx
+PyMuPDF
+pikepdf
+gunicorn

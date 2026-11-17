@@ -1,0 +1,1524 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ОфисКонвертер & PDF-Мастер | Локальный сервис для офиса и бухгалтерии</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --radius-lg: 14px;
+            --radius-md: 8px;
+            --radius-sm: 6px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 24px 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+        }
+
+        /* Шапка */
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .header-title-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .header-icon {
+            font-size: 32px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(37,99,235,0.3);
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+        .subtitle {
+            font-size: 15px;
+            color: var(--text-muted);
+            max-width: 760px;
+            margin: 0 auto 16px;
+        }
+
+        /* Бейджи статуса */
+        .status-badges {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 13px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .dot-green { background-color: #22c55e; }
+        .dot-blue { background-color: #3b82f6; }
+        .dot-amber { background-color: #f59e0b; }
+
+        /* Всплывающие уведомления */
+        .alert {
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .alert-error {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        .alert-success {
+            background-color: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        .alert-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.7;
+        }
+        .alert-close:hover { opacity: 1; }
+
+        /* Основная карточка */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .section-label {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Зона Drag and Drop и выбора файлов */
+        .dropzone {
+            border: 2px dashed #93c5fd;
+            background: #f8fafc;
+            border-radius: var(--radius-lg);
+            padding: 36px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        .dropzone-icon {
+            font-size: 44px;
+            margin-bottom: 12px;
+        }
+        .dropzone-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+        .dropzone-hint {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        .dropzone-formats {
+            display: inline-block;
+            font-size: 12px;
+            color: #64748b;
+            background: #e2e8f0;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .btn-select {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 10px 22px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 6px;
+        }
+        .btn-select:hover {
+            background: var(--primary-hover);
+        }
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Список выбранных файлов */
+        .selected-files-container {
+            margin-top: 20px;
+            display: none;
+        }
+        .files-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: #f1f5f9;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .files-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-link {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+        }
+        .btn-link.danger {
+            color: var(--danger);
+        }
+
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 8px 12px;
+            transition: border-color 0.2s;
+        }
+        .file-item:hover {
+            border-color: #cbd5e1;
+        }
+        .file-item-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+        .file-ext-tag {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 6px;
+            border-radius: 4px;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+        .tag-pdf { background-color: #ef4444; }
+        .tag-doc, .tag-docx { background-color: #2563eb; }
+        .tag-xls, .tag-xlsx { background-color: #16a34a; }
+        .tag-csv { background-color: #ca8a04; }
+        .tag-img { background-color: #9333ea; }
+        .tag-txt { background-color: #64748b; }
+        .tag-other { background-color: #475569; }
+
+        .file-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 480px;
+        }
+        .file-size {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-left: 8px;
+            flex-shrink: 0;
+        }
+        .file-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-order, .btn-remove {
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--text-muted);
+            transition: all 0.15s;
+        }
+        .btn-order:hover {
+            background: #e2e8f0;
+            color: var(--text-main);
+        }
+        .btn-remove:hover {
+            background: #fee2e2;
+            color: var(--danger);
+            border-color: #fca5a5;
+        }
+
+        /* Выбор категории и операций */
+        .operations-section {
+            margin-top: 32px;
+        }
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .category-tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid transparent;
+            background: #f1f5f9;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .category-tab:hover {
+            background: #e2e8f0;
+            color: var(--text-main);
+        }
+        .category-tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+        }
+
+        .operations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .op-card {
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .op-card:hover {
+            border-color: #93c5fd;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+        .op-card.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+        .op-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        .op-icon {
+            font-size: 22px;
+            line-height: 1;
+        }
+        .op-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.3;
+        }
+        .op-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.35;
+            margin-bottom: 8px;
+        }
+        .op-badge {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            align-self: flex-start;
+        }
+        .op-card.selected .op-badge {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Блок динамических настроек */
+        .options-panel {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 24px;
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .options-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+        }
+        .form-control, select.form-control {
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            background: white;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+        }
+        .form-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Пресеты штампов */
+        .stamp-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .stamp-chip {
+            padding: 4px 10px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .stamp-chip:hover, .stamp-chip.active {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* Цвета штампов */
+        .color-options {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .color-dot-label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* Большая кнопка отправки */
+        .submit-section {
+            margin-top: 10px;
+        }
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 16px 24px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(37,99,235,0.35);
+        }
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(37,99,235,0.45);
+        }
+        .btn-submit:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .submit-hint {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+
+        /* Оверлей загрузки */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            padding: 20px;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-text {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .loading-subtext {
+            font-size: 14px;
+            opacity: 0.8;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        /* Футер */
+        .footer {
+            text-align: center;
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 30px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .card { padding: 20px 16px; }
+            .operations-grid { grid-template-columns: 1fr; }
+            .file-name { max-width: 220px; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Шапка -->
+    <header class="header">
+        <div class="header-title-box">
+            <div class="header-icon">📑</div>
+            <h1>ОфисМастер & PDF-Конвертер</h1>
+        </div>
+        <p class="subtitle">
+            Локальный защищенный инструмент для бухгалтерии, юристов и офисных сотрудников.
+            Конвертируйте, склеивайте, сжимайте, нумеруйте и ставьте штампы прямо на вашем компьютере без риска утечки документов.
+        </p>
+
+        <div class="status-badges">
+            <div class="badge">
+                <span class="badge-dot dot-green"></span>
+                <span>⚡ Векторный движок PyMuPDF: Активен</span>
+            </div>
+            <div class="badge">
+                <span class="badge-dot dot-blue"></span>
+                <span>🔒 100% Локально и приватно</span>
+            </div>
+            <div class="badge">
+                <span class="badge-dot {{ 'dot-green' if tesseract else 'dot-amber' }}"></span>
+                <span>👁️ OCR Tesseract: {{ 'Подключен' if tesseract else 'Базовый режим' }}</span>
+            </div>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-error" id="flashAlert">
+            <span>⚠️ {{ messages[0] }}</span>
+            <button class="alert-close" onclick="document.getElementById('flashAlert').style.display='none'">&times;</button>
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="alert alert-success" id="successAlert" style="display: none;">
+        <span id="successMsg">✅ Документы успешно обработаны и скачаны!</span>
+        <button class="alert-close" onclick="document.getElementById('successAlert').style.display='none'">&times;</button>
+    </div>
+
+    <!-- Основная форма -->
+    <form id="convertForm" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="format" id="targetFormat" value="MERGE_PDF">
+        <input type="hidden" name="download_token" id="downloadToken" value="">
+
+        <!-- КАРТОЧКА 1: Выбор файлов -->
+        <div class="card">
+            <div class="section-label">
+                <span>1. Выберите документы</span>
+            </div>
+
+            <div class="dropzone" id="dropzone">
+                <div class="dropzone-icon">📥</div>
+                <div class="dropzone-title">Перетащите файлы сюда или нажмите для выбора</div>
+                <div class="dropzone-hint">
+                    Вы можете выбрать <strong>сразу несколько файлов</strong> (Ctrl+клик, Shift+клик или Cmd+A)
+                </div>
+                <button type="button" class="btn-select" id="btnSelectFiles">📁 Обзор файлов</button>
+                <div style="margin-top: 14px;">
+                    <span class="dropzone-formats">PDF • DOCX • XLSX • XLS • CSV • Картинки (PNG, JPG) • TXT</span>
+                </div>
+                <input type="file" id="fileInput" name="files" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.png,.jpg,.jpeg,.bmp,.webp,.tiff,.txt">
+            </div>
+
+            <!-- Список выбранных файлов -->
+            <div class="selected-files-container" id="filesContainer">
+                <div class="files-header">
+                    <span id="filesCountLabel">Выбрано файлов: 0 (0 КБ)</span>
+                    <div class="files-actions">
+                        <button type="button" class="btn-link" id="btnAddMore">+ Добавить еще</button>
+                        <button type="button" class="btn-link danger" id="btnClearFiles">Очистить все ✕</button>
+                    </div>
+                </div>
+                <div class="file-list" id="fileList"></div>
+            </div>
+        </div>
+
+        <!-- КАРТОЧКА 2: Выбор действия -->
+        <div class="card operations-section">
+            <div class="section-label">
+                <span>2. Выберите операцию</span>
+            </div>
+
+            <!-- Табы категорий -->
+            <div class="category-tabs">
+                <button type="button" class="category-tab active" data-cat="all">🌟 Все операции</button>
+                <button type="button" class="category-tab" data-cat="manage">📁 Сборка и Страницы</button>
+                <button type="button" class="category-tab" data-cat="accounting">💼 Бухгалтерия и Делопроизводство</button>
+                <button type="button" class="category-tab" data-cat="convert">📝 Конвертация Документов</button>
+                <button type="button" class="category-tab" data-cat="optimize">🗜️ Сжатие и Защита</button>
+                <button type="button" class="category-tab" data-cat="images">🖼️ Картинки и Сканы</button>
+            </div>
+
+            <!-- Сетка операций -->
+            <div class="operations-grid" id="operationsGrid">
+
+                <!-- 1. Сборка и Страницы -->
+                <div class="op-card selected" data-op="MERGE_PDF" data-cat="manage" data-badge="Пакетно / Мульти">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">🔗</span>
+                            <div class="op-title">Склеить в один PDF</div>
+                        </div>
+                        <div class="op-desc">Объединяет любое количество PDF и картинок в единый документ в заданном порядке.</div>
+                    </div>
+                    <span class="op-badge">PDF + Картинки</span>
+                </div>
+
+                <div class="op-card" data-op="SPLIT_PDF" data-cat="manage" data-badge="Архив ZIP">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">✂️</span>
+                            <div class="op-title">Разделить PDF постранично</div>
+                        </div>
+                        <div class="op-desc">Разрезает многостраничный PDF на отдельные файлы по одной странице в ZIP.</div>
+                    </div>
+                    <span class="op-badge">PDF</span>
+                </div>
+
+                <div class="op-card" data-op="EXTRACT_PAGES" data-cat="manage" data-options="pages" data-badge="Выборка">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">🎯</span>
+                            <div class="op-title">Извлечь нужные страницы</div>
+                        </div>
+                        <div class="op-desc">Вырезает только указанные страницы (например: 1-3, 5, 8) в новый документ.</div>
+                    </div>
+                    <span class="op-badge">PDF</span>
+                </div>
+
+                <div class="op-card" data-op="DELETE_PAGES" data-cat="manage" data-options="pages" data-badge="Очистка">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">🗑️</span>
+                            <div class="op-title">Удалить лишние страницы</div>
+                        </div>
+                        <div class="op-desc">Удаляет пустые листы или ненужные страницы (например: 2, 4) из документа.</div>
+                    </div>
+                    <span class="op-badge">PDF</span>
+                </div>
+
+                <div class="op-card" data-op="ROTATE_PDF" data-cat="manage" data-options="rotate" data-badge="Поворот">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">🔄</span>
+                            <div class="op-title">Повернуть страницы</div>
+                        </div>
+                        <div class="op-desc">Исправляет перевернутые и боковые сканы (поворот на 90°, 180°, 270°).</div>
+                    </div>
+                    <span class="op-badge">PDF</span>
+                </div>
+
+                <!-- 2. Бухгалтерия и Делопроизводство -->
+                <div class="op-card" data-op="STAMP_PDF" data-cat="accounting" data-options="stamp" data-badge="Штамп">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">🔴</span>
+                            <div class="op-title">Штамп на документ</div>
+                        </div>
+                        <div class="op-desc">Официальные штампы «ОПЛАЧЕНО», «КОПИЯ ВЕРНА», «СОГЛАСОВАНО» или свой текст с датой.</div>
+                    </div>
+                    <span class="op-badge">Бухгалтерия</span>
+                </div>
+
+                <div class="op-card" data-op="NUMBER_PAGES" data-cat="accounting" data-options="numbering" data-badge="Нумерация">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">🔢</span>
+                            <div class="op-title">Нумерация страниц</div>
+                        </div>
+                        <div class="op-desc">Проставляет номера «Стр. X из Y» для суда (Мой Арбитр), налоговой и архива.</div>
+                    </div>
+                    <span class="op-badge">Канцелярия / Суд</span>
+                </div>
+
+                <div class="op-card" data-op="EXCEL_TO_PDF" data-cat="accounting" data-badge="Таблицы">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">📊</span>
+                            <div class="op-title">Excel / CSV -> в PDF</div>
+                        </div>
+                        <div class="op-desc">Печатный альбомный PDF с авто-шириной колонок и рамками (поддерживает 1С и CP1251).</div>
+                    </div>
+                    <span class="op-badge">XLSX, CSV -> PDF</span>
+                </div>
+
+                <div class="op-card" data-op="PDF_TO_EXCEL" data-cat="accounting" data-badge="Выгрузка">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">📑</span>
+                            <div class="op-title">PDF -> в Excel (XLSX)</div>
+                        </div>
+                        <div class="op-desc">Извлечение таблиц из PDF счетов, актов и банковских выписок в редактируемый Excel.</div>
+                    </div>
+                    <span class="op-badge">PDF -> XLSX</span>
+                </div>
+
+                <div class="op-card" data-op="MERGE_EXCEL" data-cat="accounting" data-badge="Сводка">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">📈</span>
+                            <div class="op-title">Объединить Excel / CSV книги</div>
+                        </div>
+                        <div class="op-desc">Склеивает несколько отчетов или CSV-файлов в одну книгу Excel (по отдельным листам).</div>
+                    </div>
+                    <span class="op-badge">XLSX, CSV</span>
+                </div>
+
+                <!-- 3. Конвертация Документов -->
+                <div class="op-card" data-op="WORD_TO_PDF" data-cat="convert" data-badge="Векторный PDF">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">📘</span>
+                            <div class="op-title">Word (DOCX) -> в PDF</div>
+                        </div>
+                        <div class="op-desc">Конвертирует документы Word в PDF с сохранением таблиц, стилей и списков.</div>
+                    </div>
+                    <span class="op-badge">DOCX -> PDF</span>
+                </div>
+
+                <div class="op-card" data-op="WORD_FROM_PDF" data-cat="convert" data-badge="Редактируемый">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">📄</span>
+                            <div class="op-title">PDF -> в Word (DOCX)</div>
+                        </div>
+                        <div class="op-desc">Преобразует PDF в редактируемый DOCX с сохранением параграфов и форматирования.</div>
+                    </div>
+                    <span class="op-badge">PDF -> DOCX</span>
+                </div>
+
+                <div class="op-card" data-op="TXT_TO_PDF" data-cat="convert" data-badge="Текст">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">📝</span>
+                            <div class="op-title">Текст (TXT) -> в PDF</div>
+                        </div>
+                        <div class="op-desc">Превращает текстовый файл в аккуратный A4 PDF документ.</div>
+                    </div>
+                    <span class="op-badge">TXT -> PDF</span>
+                </div>
+
+                <div class="op-card" data-op="PDF_TO_TXT" data-cat="convert" data-badge="Чистый текст">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">📋</span>
+                            <div class="op-title">Извлечь текст (в TXT)</div>
+                        </div>
+                        <div class="op-desc">Быстрое извлечение всего текста из PDF или DOCX файла без форматирования.</div>
+                    </div>
+                    <span class="op-badge">PDF, DOCX -> TXT</span>
+                </div>
+
+                <!-- 4. Сжатие и Защита -->
+                <div class="op-card" data-op="COMPRESS_PDF" data-cat="optimize" data-options="compress" data-badge="Оптимизация">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">🗜️</span>
+                            <div class="op-title">Сжать PDF (Уменьшить вес)</div>
+                        </div>
+                        <div class="op-desc">Оптимальное для отправки по email или экстремальное для лимитов Госуслуг (до 3-5 МБ).</div>
+                    </div>
+                    <span class="op-badge">PDF</span>
+                </div>
+
+                <div class="op-card" data-op="PROTECT_PDF" data-cat="optimize" data-options="password" data-badge="AES-256">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">🔐</span>
+                            <div class="op-title">Защитить PDF паролем</div>
+                        </div>
+                        <div class="op-desc">Шифрование конфиденциальных отчетов и зарплатных ведомостей паролем AES-256.</div>
+                    </div>
+                    <span class="op-badge">Безопасность</span>
+                </div>
+
+                <div class="op-card" data-op="UNLOCK_PDF" data-cat="optimize" data-options="password" data-badge="Снятие защиты">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">🔓</span>
+                            <div class="op-title">Снять пароль с PDF</div>
+                        </div>
+                        <div class="op-desc">Удаление пароля и ограничений на печать/копирование с документа.</div>
+                    </div>
+                    <span class="op-badge">PDF</span>
+                </div>
+
+                <!-- 5. Картинки и Сканы -->
+                <div class="op-card" data-op="PDF_FROM_IMAGES" data-cat="images" data-badge="Сканы -> PDF">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">📸</span>
+                            <div class="op-title">Картинки -> в один PDF</div>
+                        </div>
+                        <div class="op-desc">Сборка фотографий и сканов (JPG, PNG, WEBP, BMP) в один многостраничный PDF.</div>
+                    </div>
+                    <span class="op-badge">JPG, PNG -> PDF</span>
+                </div>
+
+                <div class="op-card" data-op="IMAGES_FROM_PDF" data-cat="images" data-badge="200 DPI">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">🖼️</span>
+                            <div class="op-title">PDF -> в Картинки (PNG)</div>
+                        </div>
+                        <div class="op-desc">Сохраняет каждую страницу PDF в качественное изображение PNG в ZIP-архиве.</div>
+                    </div>
+                    <span class="op-badge">PDF -> PNG</span>
+                </div>
+
+                <div class="op-card" data-op="WORD_OCR" data-cat="images" data-badge="OCR Распознавание">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">👁️</span>
+                            <div class="op-title">Скан / Фото -> в Word (OCR)</div>
+                        </div>
+                        <div class="op-desc">Оптическое распознавание текста со сканов и фото документов в Word.</div>
+                    </div>
+                    <span class="op-badge">Скан -> DOCX</span>
+                </div>
+
+                <div class="op-card" data-op="EXCEL_OCR" data-cat="images" data-badge="OCR Таблицы">
+                    <div>
+                        <div class="op-header">
+                            <span class="op-icon">📊</span>
+                            <div class="op-title">Скан таблицы -> в Excel (OCR)</div>
+                        </div>
+                        <div class="op-desc">Распознавание табличных данных со скана или изображения в таблицу Excel.</div>
+                    </div>
+                    <span class="op-badge">Скан -> XLSX</span>
+                </div>
+
+            </div>
+
+            <!-- ДИНАМИЧЕСКИЕ НАСТРОЙКИ ОПЕРАЦИИ -->
+
+            <!-- Настройки ШТАМПА -->
+            <div class="options-panel" id="opt-stamp">
+                <div class="options-title">🔴 Параметры штампа</div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label class="form-label">Готовые бухгалтерские штампы:</label>
+                    <div class="stamp-chips">
+                        <button type="button" class="stamp-chip active" data-stamp="ОПЛАЧЕНО">ОПЛАЧЕНО</button>
+                        <button type="button" class="stamp-chip" data-stamp="КОПИЯ ВЕРНА">КОПИЯ ВЕРНА</button>
+                        <button type="button" class="stamp-chip" data-stamp="СОГЛАСОВАНО">СОГЛАСОВАНО</button>
+                        <button type="button" class="stamp-chip" data-stamp="КОНФИДЕНЦИАЛЬНО">КОНФИДЕНЦИАЛЬНО</button>
+                        <button type="button" class="stamp-chip" data-stamp="ДУБЛИКАТ">ДУБЛИКАТ</button>
+                        <button type="button" class="stamp-chip" data-stamp="АННУЛИРОВАНО">АННУЛИРОВАНО</button>
+                        <button type="button" class="stamp-chip" data-stamp="">Свой текст...</button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="stampText">Текст штампа:</label>
+                        <input type="text" class="form-control" name="stamp_text" id="stampText" value="ОПЛАЧЕНО" placeholder="Например: ОПЛАЧЕНО или ООО «Ромашка»">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Цвет штампа:</label>
+                        <div class="color-options" style="margin-top: 6px;">
+                            <label class="color-dot-label">
+                                <input type="radio" name="stamp_color" value="red" checked>
+                                <span style="color: #dc2626; font-weight: bold;">Красный</span>
+                            </label>
+                            <label class="color-dot-label">
+                                <input type="radio" name="stamp_color" value="blue">
+                                <span style="color: #2563eb; font-weight: bold;">Синий</span>
+                            </label>
+                            <label class="color-dot-label">
+                                <input type="radio" name="stamp_color" value="green">
+                                <span style="color: #16a34a; font-weight: bold;">Зеленый</span>
+                            </label>
+                            <label class="color-dot-label">
+                                <input type="radio" name="stamp_color" value="gray">
+                                <span style="color: #475569; font-weight: bold;">Серый</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="stampPosition">Расположение штампа:</label>
+                        <select class="form-control" name="stamp_position" id="stampPosition">
+                            <option value="top-right" selected>Правый верхний угол (стандарт)</option>
+                            <option value="bottom-right">Правый нижний угол</option>
+                            <option value="bottom-left">Левый нижний угол</option>
+                            <option value="center_watermark">По центру страницы (диагональный водяной знак)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="stampPages">Применить к страницам:</label>
+                        <select class="form-control" name="stamp_pages" id="stampPages">
+                            <option value="all" selected>Ко всем страницам</option>
+                            <option value="first">Только на первую страницу (для счетов)</option>
+                            <option value="last">Только на последнюю страницу (для актов/копий)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 6px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 500;">
+                        <input type="checkbox" name="stamp_add_date" id="stampAddDate" value="true" checked>
+                        <span>Добавить текущую дату ({{ now_date }})</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Настройки НУМЕРАЦИИ -->
+            <div class="options-panel" id="opt-numbering">
+                <div class="options-title">🔢 Параметры нумерации страниц</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="numFormat">Формат номера:</label>
+                        <select class="form-control" name="num_format" id="numFormat">
+                            <option value="page_of_total" selected>Стр. {n} из {total} (для суда и архива)</option>
+                            <option value="simple_of_total">{n} / {total}</option>
+                            <option value="dashes">- {n} -</option>
+                            <option value="num_only">Только номер: {n}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="numPosition">Положение номера:</label>
+                        <select class="form-control" name="num_position" id="numPosition">
+                            <option value="bottom-center" selected>Внизу по центру (стандарт)</option>
+                            <option value="bottom-right">Внизу справа</option>
+                            <option value="top-right">Вверху справа</option>
+                            <option value="top-center">Вверху по центру</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="numStart">Начальный номер:</label>
+                        <input type="number" class="form-control" name="num_start" id="numStart" value="1" min="1">
+                        <span class="form-hint">С какого номера начинать отсчет (обычно 1)</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="numStartPage">Начать нумерацию со страницы:</label>
+                        <input type="number" class="form-control" name="num_start_page" id="numStartPage" value="1" min="1">
+                        <span class="form-hint">Укажите 2, если хотите пропустить титульный лист/обложку</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Настройки ПОВОРОТА -->
+            <div class="options-panel" id="opt-rotate">
+                <div class="options-title">🔄 Параметры поворота страниц</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="rotateAngle">Угол поворота:</label>
+                        <select class="form-control" name="rotate_angle" id="rotateAngle">
+                            <option value="90" selected>90° по часовой стрелке ↻</option>
+                            <option value="180">180° (вверх ногами) ↺↻</option>
+                            <option value="270">90° против часовой стрелки (270°) ↺</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="rotateFilter">Применить к страницам:</label>
+                        <select class="form-control" name="rotate_filter" id="rotateFilter">
+                            <option value="all" selected>Все страницы документа</option>
+                            <option value="odd">Только нечетные (1, 3, 5...)</option>
+                            <option value="even">Только четные (2, 4, 6...)</option>
+                            <option value="custom">Указать номера вручную</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" id="rotateCustomGroup" style="display: none;">
+                    <label class="form-label" for="rotateCustomRange">Номера страниц для поворота:</label>
+                    <input type="text" class="form-control" name="rotate_custom_range" id="rotateCustomRange" placeholder="Например: 1, 3-5, 8">
+                </div>
+            </div>
+
+            <!-- Настройки ИЗВЛЕЧЕНИЯ / УДАЛЕНИЯ СТРАНИЦ -->
+            <div class="options-panel" id="opt-pages">
+                <div class="options-title" id="pagesTitle">🎯 Выбор страниц</div>
+                <div class="form-group">
+                    <label class="form-label" for="pageRange" id="pagesLabel">Номера или диапазоны страниц:</label>
+                    <input type="text" class="form-control" name="page_range" id="pageRange" placeholder="Например: 1-3, 5, 8-10">
+                    <span class="form-hint" id="pagesHint">
+                        Используйте запятые для разделения и дефисы для диапазонов. Например, «1-3, 5» оставит страницы 1, 2, 3 и 5.
+                    </span>
+                </div>
+            </div>
+
+            <!-- Настройки СЖАТИЯ -->
+            <div class="options-panel" id="opt-compress">
+                <div class="options-title">🗜️ Уровень сжатия PDF</div>
+                <div class="form-row">
+                    <label style="display: flex; gap: 10px; cursor: pointer; background: white; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                        <input type="radio" name="compress_level" value="optimal" checked>
+                        <div>
+                            <div style="font-weight: 700; font-size: 14px;">Оптимальное сжатие (Рекомендуется)</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                                Баланс высокого качества текста и уменьшения веса. Идеально для отправки контрагентам по email.
+                            </div>
+                        </div>
+                    </label>
+
+                    <label style="display: flex; gap: 10px; cursor: pointer; background: white; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                        <input type="radio" name="compress_level" value="extreme">
+                        <div>
+                            <div style="font-weight: 700; font-size: 14px;">Экстремальное сжатие</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                                Максимальное урезание веса для жестких лимитов (3-5 МБ на Госуслугах, Мой Арбитр, ФНС).
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Настройки ПАРОЛЯ -->
+            <div class="options-panel" id="opt-password">
+                <div class="options-title" id="passwordTitle">🔐 Пароль документа</div>
+                <div class="form-group">
+                    <label class="form-label" for="pdfPassword" id="passwordLabel">Введите пароль:</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="password" class="form-control" name="password" id="pdfPassword" placeholder="Введите пароль">
+                        <button type="button" class="btn-select" id="btnTogglePassword" style="margin: 0; padding: 8px 14px;">👁️</button>
+                    </div>
+                    <span class="form-hint" id="passwordHint">Шифрование выполняется по стандарту AES-256</span>
+                </div>
+            </div>
+
+            <!-- КНОПКА ЗАПУСКА -->
+            <div class="submit-section">
+                <button type="submit" class="btn-submit" id="btnSubmit">
+                    <span>⚡ Выполнить операцию</span>
+                </button>
+                <div class="submit-hint" id="batchHint">
+                    ✨ Если выбрано несколько файлов, результат будет автоматически упакован в единый ZIP-архив с сохранением имен.
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+    <footer class="footer">
+        <div>ОфисМастер — Локальный конвертер и процессор документов для офиса и бухгалтерии.</div>
+        <div style="margin-top: 4px;">Все операции происходят изолированно на вашем компьютере. Данные не передаются в интернет.</div>
+    </footer>
+</div>
+
+<!-- Оверлей загрузки -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Идет обработка документов...</div>
+    <div class="loading-subtext">Пожалуйста, подождите. Скорость зависит от количества и размера файлов.</div>
+</div>
+
+<script>
+    // Хранилище выбранных файлов
+    let selectedFiles = [];
+
+    // Элементы DOM
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const btnSelectFiles = document.getElementById('btnSelectFiles');
+    const filesContainer = document.getElementById('filesContainer');
+    const fileList = document.getElementById('fileList');
+    const filesCountLabel = document.getElementById('filesCountLabel');
+    const btnAddMore = document.getElementById('btnAddMore');
+    const btnClearFiles = document.getElementById('btnClearFiles');
+    const targetFormatInput = document.getElementById('targetFormat');
+    const convertForm = document.getElementById('convertForm');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const downloadTokenInput = document.getElementById('downloadToken');
+    const successAlert = document.getElementById('successAlert');
+
+    // Опции
+    const optStamp = document.getElementById('opt-stamp');
+    const optNumbering = document.getElementById('opt-numbering');
+    const optRotate = document.getElementById('opt-rotate');
+    const optPages = document.getElementById('opt-pages');
+    const optCompress = document.getElementById('opt-compress');
+    const optPassword = document.getElementById('opt-password');
+
+    // Клик по дропзоне или кнопке обзора
+    btnSelectFiles.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fileInput.click();
+    });
+    dropzone.addEventListener('click', () => fileInput.click());
+    btnAddMore.addEventListener('click', () => fileInput.click());
+
+    // Drag and Drop
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add('dragover');
+        });
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('dragover');
+        });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        if (dt && dt.files && dt.files.length > 0) {
+            handleNewFiles(dt.files);
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+            handleNewFiles(e.target.files);
+        }
+    });
+
+    function handleNewFiles(fileListObj) {
+        for (let i = 0; i < fileListObj.length; i++) {
+            const f = fileListObj[i];
+            // Проверка дубликатов по имени и размеру
+            const exists = selectedFiles.some(item => item.name === f.name && item.size === f.size);
+            if (!exists) {
+                selectedFiles.push(f);
+            }
+        }
+        updateFilesUI();
+    }
+
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 Б';
+        const k = 1024;
+        const sizes = ['Б', 'КБ', 'МБ', 'ГБ'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function getTagClass(ext) {
+        ext = ext.toLowerCase();
+        if (ext === 'pdf') return 'tag-pdf';
+        if (['doc', 'docx'].includes(ext)) return 'tag-docx';
+        if (['xls', 'xlsx'].includes(ext)) return 'tag-xlsx';
+        if (ext === 'csv') return 'tag-csv';
+        if (['png', 'jpg', 'jpeg', 'webp', 'bmp', 'tiff', 'tif'].includes(ext)) return 'tag-img';
+        if (ext === 'txt') return 'tag-txt';
+        return 'tag-other';
+    }
+
+    function updateFilesUI() {
+        if (selectedFiles.length === 0) {
+            filesContainer.style.display = 'none';
+            btnSubmit.innerHTML = '<span>⚡ Выберите файлы для начала</span>';
+            btnSubmit.disabled = true;
+            return;
+        }
+
+        filesContainer.style.display = 'block';
+        btnSubmit.disabled = false;
+
+        let totalSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
+        filesCountLabel.textContent = `Выбрано файлов: ${selectedFiles.length} (общий объем: ${formatBytes(totalSize)})`;
+
+        fileList.innerHTML = '';
+        selectedFiles.forEach((file, index) => {
+            const ext = file.name.split('.').pop() || '';
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            item.innerHTML = `
+                <div class="file-item-left">
+                    <span class="file-ext-tag ${getTagClass(ext)}">${ext.substring(0, 4)}</span>
+                    <span class="file-name" title="${file.name}">${file.name}</span>
+                    <span class="file-size">(${formatBytes(file.size)})</span>
+                </div>
+                <div class="file-item-actions">
+                    ${index > 0 ? `<button type="button" class="btn-order" title="Переместить выше" onclick="moveFile(${index}, -1)">▲</button>` : ''}
+                    ${index < selectedFiles.length - 1 ? `<button type="button" class="btn-order" title="Переместить ниже" onclick="moveFile(${index}, 1)">▼</button>` : ''}
+                    <button type="button" class="btn-remove" title="Удалить файл" onclick="removeFile(${index})">✕</button>
+                </div>
+            `;
+            fileList.appendChild(item);
+        });
+
+        updateSubmitButtonText();
+    }
+
+    window.removeFile = function(index) {
+        selectedFiles.splice(index, 1);
+        updateFilesUI();
+    };
+
+    window.moveFile = function(index, delta) {
+        const newIndex = index + delta;
+        if (newIndex >= 0 && newIndex < selectedFiles.length) {
+            const temp = selectedFiles[index];
+            selectedFiles[index] = selectedFiles[newIndex];
+            selectedFiles[newIndex] = temp;
+            updateFilesUI();
+        }
+    };
+
+    btnClearFiles.addEventListener('click', () => {
+        selectedFiles = [];
+        fileInput.value = '';
+        updateFilesUI();
+    });
+
+    // Переключение вкладок категорий
+    const categoryTabs = document.querySelectorAll('.category-tab');
+    const opCards = document.querySelectorAll('.op-card');
+
+    categoryTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            categoryTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const cat = tab.getAttribute('data-cat');
+
+            opCards.forEach(card => {
+                if (cat === 'all' || card.getAttribute('data-cat') === cat) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Выбор карточки операции
+    opCards.forEach(card => {
+        card.addEventListener('click', () => {
+            opCards.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            const op = card.getAttribute('data-op');
+            targetFormatInput.value = op;
+            showOptionsForOp(op, card);
+            updateSubmitButtonText();
+        });
+    });
+
+    function showOptionsForOp(op, card) {
+        // Скрыть все панели настроек
+        [optStamp, optNumbering, optRotate, optPages, optCompress, optPassword].forEach(p => p.style.display = 'none');
+
+        if (op === 'STAMP_PDF') {
+            optStamp.style.display = 'block';
+        } else if (op === 'NUMBER_PAGES') {
+            optNumbering.style.display = 'block';
+        } else if (op === 'ROTATE_PDF') {
+            optRotate.style.display = 'block';
+        } else if (op === 'EXTRACT_PAGES') {
+            optPages.style.display = 'block';
+            document.getElementById('pagesTitle').textContent = '🎯 Извлечение страниц';
+            document.getElementById('pagesLabel').textContent = 'Какие страницы оставить в новом файле:';
+            document.getElementById('pagesHint').textContent = 'Например: 1-3, 5, 8. Остальные страницы будут отброшены.';
+        } else if (op === 'DELETE_PAGES') {
+            optPages.style.display = 'block';
+            document.getElementById('pagesTitle').textContent = '🗑️ Удаление страниц';
+            document.getElementById('pagesLabel').textContent = 'Какие страницы удалить из документа:';
+            document.getElementById('pagesHint').textContent = 'Например: 2, 4. Эти страницы будут удалены из файла.';
+        } else if (op === 'COMPRESS_PDF') {
+            optCompress.style.display = 'block';
+        } else if (op === 'PROTECT_PDF') {
+            optPassword.style.display = 'block';
+            document.getElementById('passwordTitle').textContent = '🔐 Установка пароля на открытие';
+            document.getElementById('passwordLabel').textContent = 'Придумайте пароль:';
+            document.getElementById('passwordHint').textContent = 'Документ будет зашифрован надежным алгоритмом AES-256.';
+        } else if (op === 'UNLOCK_PDF') {
+            optPassword.style.display = 'block';
+            document.getElementById('passwordTitle').textContent = '🔓 Снятие пароля и ограничений';
+            document.getElementById('passwordLabel').textContent = 'Пароль от документа (если требуется):';
+            document.getElementById('passwordHint').textContent = 'Если документ защищен от печати без пароля на открытие, оставьте поле пустым.';
+        }
+    }
+
+    function updateSubmitButtonText() {
+        if (selectedFiles.length === 0) {
+            btnSubmit.innerHTML = '<span>⚡ Выберите файлы для начала</span>';
+            btnSubmit.disabled = true;
+            return;
+        }
+
+        btnSubmit.disabled = false;
+        const currentOp = targetFormatInput.value;
+        const count = selectedFiles.length;
+
+        let actionWord = 'Выполнить';
+        if (currentOp === 'MERGE_PDF') actionWord = `Склеить ${count} ${getFileWord(count)} в один PDF`;
+        else if (currentOp === 'SPLIT_PDF') actionWord = `Разделить PDF на страницы`;
+        else if (currentOp === 'COMPRESS_PDF') actionWord = `Сжать ${count} ${getFileWord(count)}`;
+        else if (currentOp === 'STAMP_PDF') actionWord = `Поставить штамп на ${count} ${getFileWord(count)}`;
+        else if (currentOp === 'NUMBER_PAGES') actionWord = `Пронумеровать ${count} ${getFileWord(count)}`;
+        else if (currentOp === 'WORD_TO_PDF') actionWord = `Конвертировать ${count} ${getFileWord(count)} в PDF`;
+        else if (currentOp === 'WORD_FROM_PDF') actionWord = `Конвертировать ${count} ${getFileWord(count)} в Word`;
+        else if (currentOp === 'EXCEL_TO_PDF') actionWord = `Конвертировать ${count} ${getFileWord(count)} в PDF`;
+        else if (currentOp === 'PDF_TO_EXCEL') actionWord = `Извлечь таблицы в Excel`;
+        else if (currentOp === 'MERGE_EXCEL') actionWord = `Объединить ${count} ${getFileWord(count)} в одну книгу`;
+        else if (currentOp === 'PDF_FROM_IMAGES') actionWord = `Собрать ${count} ${getFileWord(count)} в PDF`;
+        else if (currentOp === 'IMAGES_FROM_PDF') actionWord = `Экспортировать страницы в PNG`;
+        else if (currentOp === 'ROTATE_PDF') actionWord = `Повернуть страницы`;
+        else if (currentOp === 'PROTECT_PDF') actionWord = `Установить пароль`;
+        else if (currentOp === 'UNLOCK_PDF') actionWord = `Снять пароль`;
+        else actionWord = `Выполнить операцию (${count} ${getFileWord(count)})`;
+
+        btnSubmit.innerHTML = `<span>⚡ ${actionWord}</span>`;
+    }
+
+    function getFileWord(n) {
+        if (n % 10 === 1 && n % 100 !== 11) return 'файл';
+        if ([2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100)) return 'файла';
+        return 'файлов';
+    }
+
+    // Чипы штампов
+    const stampChips = document.querySelectorAll('.stamp-chip');
+    const stampTextInput = document.getElementById('stampText');
+
+    stampChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            stampChips.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            const val = chip.getAttribute('data-stamp');
+            if (val) {
+                stampTextInput.value = val;
+            } else {
+                stampTextInput.value = '';
+                stampTextInput.focus();
+            }
+        });
+    });
+
+    // Поворот custom
+    const rotateFilter = document.getElementById('rotateFilter');
+    const rotateCustomGroup = document.getElementById('rotateCustomGroup');
+    rotateFilter.addEventListener('change', () => {
+        rotateCustomGroup.style.display = (rotateFilter.value === 'custom') ? 'block' : 'none';
+    });
+
+    // Глазок для пароля
+    const btnTogglePassword = document.getElementById('btnTogglePassword');
+    const pdfPassword = document.getElementById('pdfPassword');
+    btnTogglePassword.addEventListener('click', () => {
+        pdfPassword.type = (pdfPassword.type === 'password') ? 'text' : 'password';
+    });
+
+    // Отправка формы с DataTransfer
+    convertForm.addEventListener('submit', (e) => {
+        if (selectedFiles.length === 0) {
+            e.preventDefault();
+            alert('Пожалуйста, выберите хотя бы один файл.');
+            return;
+        }
+
+        // Обновляем DataTransfer для input.files
+        const dt = new DataTransfer();
+        selectedFiles.forEach(f => dt.items.add(f));
+        fileInput.files = dt.files;
+
+        // Генерация токена загрузки для отслеживания завершения через cookie
+        const token = Date.now().toString();
+        downloadTokenInput.value = token;
+
+        // Показ спиннера
+        loadingOverlay.style.display = 'flex';
+        btnSubmit.disabled = true;
+
+        // Периодическая проверка куки о завершении отдачи файла сервером
+        const checkInterval = setInterval(() => {
+            if (document.cookie.indexOf('download_token=' + token) !== -1) {
+                // Скачивание началось!
+                clearInterval(checkInterval);
+                loadingOverlay.style.display = 'none';
+                btnSubmit.disabled = false;
+                successAlert.style.display = 'flex';
+                document.getElementById('successMsg').textContent = '✅ Файлы успешно обработаны и скачаны!';
+                // Удаляем куку
+                document.cookie = 'download_token=; Max-Age=0; path=/;';
+            }
+        }, 300);
+
+        // Таймаут на случай непредвиденного сброса
+        setTimeout(() => {
+            clearInterval(checkInterval);
+            loadingOverlay.style.display = 'none';
+            btnSubmit.disabled = false;
+        }, 60000);
+    });
+
+    // Первичная инициализация
+    updateFilesUI();
+</script>
+
+</body>
+</html>

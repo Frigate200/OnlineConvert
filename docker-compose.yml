@@ -1,0 +1,14 @@
+services:
+  office-converter:
+    build: .
+    container_name: office-converter
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./main.py:/app/main.py
+      - ./templates:/app/templates
+      - ./fonts:/app/fonts
+    environment:
+      - PYTHONUNBUFFERED=1
